@@ -1,12 +1,6 @@
-import glob
-import os
-import shutil
-import subprocess
-import time
+import glob, os, shutil, subprocess, time
 from tqdm import tqdm
-
-VIDEO_FOLDER_PATH = 'video_data/train/r1'
-IMAGE_FOLDER_PATH = 'image_data/train'
+from config import *
 
 
 shutil.rmtree(IMAGE_FOLDER_PATH)
@@ -25,10 +19,9 @@ for class_folder in glob.glob(os.path.join(VIDEO_FOLDER_PATH, '*')):
         video_image_path_tuples_list.append((video_file_path, image_file_path))
 print('Took {0} seconds to create class folders for images and go through all videos.'.format(time.time()-start))
 
+
 start = time.time()
 for video_file_path, image_file_path in tqdm(video_image_path_tuples_list):
     subprocess.call(["ffmpeg", "-i", video_file_path, image_file_path, "-loglevel", "quiet"], stdout=subprocess.DEVNULL)
 print('Took {0} seconds to convert the videos into images.'.format(time.time()-start))
-
-
 # took 1 hour to run

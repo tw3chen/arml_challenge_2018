@@ -3,25 +3,13 @@ import numpy as np
 import os
 import time
 from keras.utils import to_categorical
-from keras.layers import Dense, Dropout
-from keras.layers.recurrent import LSTM
-from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
-
-
-FEATURE_FOLDER_PATH = '../feature_data/train'
-
-
-def get_class_names():
-    class_names = []
-    for class_folder_path in glob.glob(os.path.join(FEATURE_FOLDER_PATH, '*')):
-        class_name = class_folder_path[class_folder_path.rindex('/')+1:]
-        class_names.append(class_name)
-        class_names = sorted(class_names)
-    return class_names
+from config import *
+from models import define_lstm
+from util import get_class_names
 
 
 start = time.time()
@@ -42,30 +30,19 @@ X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_st
 print('Took {0} seconds to load all video features into memory.'.format(time.time()-start))
 
 
-def define_lstm(sequence_length, feature_length, num_classes):
-    model = Sequential()
-    model.add(LSTM(2048, return_sequences=False,
-                   input_shape=(sequence_length, feature_length),
-                   dropout=0.5))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation='softmax'))
-    return model
-
-
-model = define_lstm(20, 2048, len(class_names))
+model = define_lstm(SEQUENCE_LENGTH, 2048, len(class_names))
 optimizer = Adam(lr=1e-5, decay=1e-6)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer,
               metrics=['accuracy'])
 
 model_name = 'lstm'
-tb = TensorBoard(log_dir=os.path.join('../log_data', model_name))
+tb = TensorBoard(log_dir=os.path.join(LOG_FOLDER_PATH, model_name))
 early_stopper = EarlyStopping(patience=2)
 timestamp = time.time()
-csv_logger = CSVLogger(os.path.join('../log_data', model_name + '-' + 'training-' + \
+csv_logger = CSVLogger(os.path.join(LOG_FOLDER_PATH, model_name + '-' + 'training-' + \
                                     str(timestamp) + '.log'))
 checkpointer = ModelCheckpoint(
-    filepath=os.path.join('../checkpoints', model_name + '.{epoch:03d}-{val_loss:.3f}.hdf5'),
+    filepath=os.path.join(CHECKPOINT_FOLDER_PATH, model_name + '.{epoch:03d}-{val_loss:.3f}.hdf5'),
     verbose=1, save_best_only=True)
 
 

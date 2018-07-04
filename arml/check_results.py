@@ -7,21 +7,11 @@ from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
+from config import *
+from util import get_class_names
 
 
 MODEL_PATH = '../checkpoints/lstm.010-1.141.hdf5'
-
-
-FEATURE_FOLDER_PATH = '../feature_data/train'
-
-
-def get_class_names():
-    class_names = []
-    for class_folder_path in glob.glob(os.path.join(FEATURE_FOLDER_PATH, '*')):
-        class_name = class_folder_path[class_folder_path.rindex('/')+1:]
-        class_names.append(class_name)
-        class_names = sorted(class_names)
-    return class_names
 
 
 start = time.time()
